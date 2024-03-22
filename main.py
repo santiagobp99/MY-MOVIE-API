@@ -1,6 +1,6 @@
 # uvicorn main:app --port 5000 --reload --host
 
-from fastapi import FastAPI, Body, Path, Query, Request, HTTPException, Depends
+from fastapi import FastAPI, Body, Path, Query, Depends
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from pydantic import BaseModel, Field, ConfigDict
@@ -8,28 +8,26 @@ from enum import Enum
 from typing import Coroutine, Optional, List
 
 # Autenticacion
-from fastapi.security import HTTPBearer
-from jwt_manager import create_token, validate_token
+from middlewares.jwt_bearer import JWTBearer
+from jwt_manager import create_token
 
 # Base de Datos
 from config.database import Session, engine, Base
 from models.movie import Movie as MovieModel
 from fastapi.encoders import jsonable_encoder
 
+# Manejo de Errores
+from middlewares.error_handler import ErrorHandler
+
 app = FastAPI()
 app.title = "Mi aplicacion con FastAPI"
 app.version = "0.0.1"
 
+# El middleware se ejecuta cuando ocurra un error en la aplicacion
+app.add_middleware(ErrorHandler)
+
 # El motor a usar es el que acabo de importar engine
 Base.metadata.create_all(bind=engine)
-
-class JWTBearer(HTTPBearer):
-    async def __call__(self, request: Request):
-        # va a devolver el token, datos de las credenciales
-        auth = await super().__call__(request)
-        data = validate_token(auth.credentials)
-        if data["email"] != "admin@gmail.com":
-            raise HTTPException(status_code=403, detail="Credenciales son invalidas")
 
 class User(BaseModel):
     email:str
