@@ -1,7 +1,6 @@
-from starlette.middleware.base import BaseHTTPMiddleware, DispatchFunction, RequestResponseEndpoint
+from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
-from starlette.responses import Response
 
 # Creacion de un Middleware para manejo de errores
 class ErrorHandler(BaseHTTPMiddleware):
